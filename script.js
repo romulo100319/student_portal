@@ -29,9 +29,10 @@ async function login() {
     const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
     if (error) return alert("Login Failed: " + error.message);
     const { data: profile } = await _supabase.from("students").select("role").eq("user_id", data.user.id).single();
-    if (profile?.role === "admin") {
-        window.location.href = "admin.html";
-    } else {
-        window.location.href = "dashboard.html";
-    }
+    // Dapat ganito ang logic para mapunta ka sa Admin page
+if (user.role === 'admin') {
+    window.location.href = 'admin.html';
+} else {
+    window.location.href = 'dashboard.html';
+}
 }
