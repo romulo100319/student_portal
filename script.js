@@ -13,9 +13,10 @@ async function register() {
     if (error) return alert("Reg Error: " + error.message);
 
     if (data.user) {
-        // Nag-insert tayo gamit ang 'id' para mag-match sa Supabase screenshot mo
+        // Gagamit tayo ng 'id' column dahil ito ang primary link sa Auth
         const { error: dbError } = await _supabase.from("students").insert({
-            id: data.user.id, // Match sa column 'id' sa screenshot
+            id: data.user.id, 
+            user_id: data.user.id, // I-fill up din natin ito para sigurado
             email: data.user.email,
             name: "New Student",
             student_no: "STU-" + Math.floor(1000 + Math.random() * 9000),
@@ -26,30 +27,28 @@ async function register() {
     }
 }
 
-// 3. LOGIN FUNCTION (FIXED REDIRECT)
+// 3. LOGIN FUNCTION (THE ULTIMATE FIX)
 async function login() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-
+    
     const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
     if (error) return alert("Login Failed: " + error.message);
 
-    // DITO ANG FIX: Kinukuha ang role gamit ang 'id' column
+    // Hahanapin natin ang profile gamit ang user_id column
     const { data: profile, error: profileError } = await _supabase
         .from("students")
         .select("role")
-        .eq("id", data.user.id) // Sinisiguro na 'id' ang gamit
+        .eq("user_id", data.user.id) // Ito na ang gagamitin natin
         .single();
 
     if (profileError || !profile) {
-        console.error("Profile Error:", profileError);
-        return alert("Profile not found in students table!");
+        return alert("Profile not found! I-check kung tama ang user_id sa table.");
     }
 
-    // Role-based redirection
     if (profile.role === 'admin') {
         alert("Welcome Admin!");
-        window.location.href = 'admin.html'; // Papasok na sa Audit Logs page
+        window.location.href = 'admin.html';
     } else {
         alert("Welcome Student!");
         window.location.href = 'dashboard.html';
