@@ -1,73 +1,132 @@
-/* ===== GENERAL ===== */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f7fa;
-  color: #333;
-  margin: 0;
-  padding: 20px;
+/* 1. Global Reset at Layout */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background-color: #f3f4f6; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; /* Ipapagitna ang card horizontally at vertically */
+    min-height: 100vh;   /* Gagamitin ang buong taas ng browser window */
+    margin: 0; 
+    padding: 20px; 
+    box-sizing: border-box;
 }
 
-h2, h3 {
-  color: #1e3a8a; /* deep blue headings */
-  margin-bottom: 10px;
+/* 2. Login/Dashboard Card Container */
+.container { 
+    background: white; 
+    padding: 2.5rem; 
+    border-radius: 16px; 
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); 
+    width: 100%; 
+    max-width: 400px; 
+    text-align: center;
 }
 
-label {
-  display: block;
-  margin-top: 15px;
-  font-weight: 500;
+h2 {
+    color: #1e3a8a;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
 }
 
-input, select, button {
-  margin-top: 5px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  width: 220px;
-  font-size: 14px;
-  transition: all 0.2s;
+h3 {
+    color: #374151;
+    text-align: left;
+    margin-top: 1.5rem;
+}
+
+/* 3. Inputs and Form Elements */
+input, select { 
+    width: 100%; 
+    padding: 12px 15px; 
+    margin: 10px 0; 
+    border-radius: 8px; 
+    border: 1px solid #d1d5db; 
+    box-sizing: border-box; 
+    font-size: 1rem;
+    transition: all 0.2s ease;
 }
 
 input:focus, select:focus {
-  outline: none;
-  border-color: #2563eb; /* blue highlight */
-  box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-button {
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  width: 150px;
-  cursor: pointer;
-  font-weight: 600;
-  margin-top: 10px;
+/* 4. Buttons Styling */
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
 }
 
-button:hover {
-  background-color: #1e40af;
+button { 
+    width: 100%; 
+    padding: 12px; 
+    border-radius: 8px; 
+    border: none; 
+    font-weight: 600; 
+    font-size: 1rem;
+    cursor: pointer; 
+    transition: all 0.2s ease;
+    display: block;
 }
 
-/* ===== SECTIONS ===== */
-h3 {
-  margin-top: 40px;
+/* Default Blue Button (Login) */
+button { 
+    background-color: #2563eb; 
+    color: white; 
 }
 
-ul#gradeList {
-  margin-top: 15px;
-  padding-left: 20px;
+/* Green Button for Register */
+button[onclick="register()"] {
+    background-color: #10b981 !important;
 }
 
-ul#gradeList li {
-  background-color: #e0e7ff;
-  padding: 8px 12px;
-  border-radius: 5px;
-  margin-bottom: 6px;
+/* Red Button for Logout */
+button[onclick="logout()"] {
+    background-color: #ef4444 !important;
+    margin-top: 20px;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 600px) {
-  input, select, button {
-    width: 100%;
-  }
+button:hover { 
+    filter: brightness(90%);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* 5. Grade List Styling (Para sa Dashboard) */
+.grade-list { 
+    list-style: none; 
+    padding: 0; 
+    text-align: left;
+    margin-top: 10px;
+}
+
+.grade-list li { 
+    background: #eff6ff; 
+    padding: 12px 15px; 
+    margin-bottom: 8px; 
+    border-radius: 8px; 
+    border-left: 5px solid #2563eb; 
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+}
+
+/* 6. Profile Card (Para sa Dashboard) */
+.profile-card {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: left;
+    border: 1px solid #e2e8f0;
+}
+ 
+.profile-card p {
+    margin: 5px 0;
+    color: #4b5563;
 }
