@@ -22,17 +22,24 @@ async function register() {
     }
 }
 
-// LOGIN FUNCTION
 async function login() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+    
     const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
     if (error) return alert("Login Failed: " + error.message);
-    const { data: profile } = await _supabase.from("students").select("role").eq("user_id", data.user.id).single();
-    // Dapat ganito ang logic para mapunta ka sa Admin page
-if (user.role === 'admin') {
-    window.location.href = 'admin.html';
-} else {
-    window.location.href = 'dashboard.html';
-}
+
+    const { data: profile, error: profileError } = await _supabase
+        .from("students")
+        .select("role")
+        .eq("user_id", data.user.id)
+        .single();
+
+    if (profileError || !profile) return alert("Profile Error!");
+
+    if (profile.role === 'admin') {
+        window.location.href = 'admin.html';
+    } else {
+        window.location.href = 'dashboard.html';
+    }
 }
