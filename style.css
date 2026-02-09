@@ -1,0 +1,73 @@
+/* ===== GENERAL ===== */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+
+h2, h3 {
+  color: #1e3a8a; /* deep blue headings */
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 500;
+}
+
+input, select, button {
+  margin-top: 5px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 220px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #2563eb; /* blue highlight */
+  box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+}
+
+button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  width: 150px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #1e40af;
+}
+
+/* ===== SECTIONS ===== */
+h3 {
+  margin-top: 40px;
+}
+
+ul#gradeList {
+  margin-top: 15px;
+  padding-left: 20px;
+}
+
+ul#gradeList li {
+  background-color: #e0e7ff;
+  padding: 8px 12px;
+  border-radius: 5px;
+  margin-bottom: 6px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  input, select, button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,83 @@
+<h2>Student Dashboard</h2>
+
+<p id="name">Loading name...</p>
+<p id="studentno">Loading student number...</p>
+
+<h3>My Grades</h3>
+<ul id="grades">
+  <li>Loading grades...</li>
+</ul>
+
+<button onclick="logout()">Logout</button>
+
+<!-- ONLY ONE supabase-js IMPORT -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  // Initialize Supabase
+  const supabaseUrl = "https://nrlsgrzqpduzzzphkhtn.supabase.co";
+  const supabaseKey = "YeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybHNncnpxcGR1enp6cGhraHRuIiwicm9sZSI6ImFubm9uIiwiaWF0IjoxNzcwNjI2MDY0LCJleHAiOjIwODYyMDIwNjR9.oQj3f76HaEHtweWu7vKTr1Atc1XYFq8gffv9eIO78Mc";
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  // Load student profile and grades
+  async function loadDashboard() {
+    try {
+      // Step 1: Get logged-in user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        alert("Not logged in");
+        window.location = "index.html";
+        return;
+      }
+
+      // Step 2: Load student profile
+      const { data: student, error: studentError } = await supabase
+        .from("students")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (studentError || !student) {
+        document.getElementById("name").innerText = "Name: Not found";
+        document.getElementById("studentno").innerText = "Student No: Not found";
+        console.log(studentError);
+      } else {
+        document.getElementById("name").innerText = "Name: " + student.name;
+        document.getElementById("studentno").innerText = "Student No: " + student.student_no;
+      }
+
+      // ✅ Step 4: Load grades with subjects
+      const { data: grades, error: gradesError } = await supabase
+        .from("grades")
+        .select(`
+          grade,
+          subjects (subject_name)
+        `)
+        .eq("user_id", user.id);
+
+      const list = document.getElementById("grades");
+      list.innerHTML = "";
+
+      if (gradesError || !grades || grades.length === 0) {
+        list.innerHTML = "<li>No grades found</li>";
+        console.log(gradesError);
+      } else {
+        grades.forEach(item => {
+          const li = document.createElement("li");
+          li.innerText = item.subjects.subject_name + ": " + item.grade;
+          list.appendChild(li);
+        });
+      }
+
+    } catch (err) {
+      console.log("Error loading dashboard:", err);
+    }
+  }
+
+  loadDashboard();
+
+  // Logout function
+  async function logout() {
+    await supabase.auth.signOut();
+    window.location = "index.html";
+  }
+</script>
