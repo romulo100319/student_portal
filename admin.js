@@ -6,35 +6,36 @@ const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 // 2. Protection & Audit Helper
 async function logAction(action, targetId, details) {
     const { data: { user } } = await _supabase.auth.getUser();
+    if (!user) return;
+
     await _supabase.from("audit_logs").insert({
-        admin_id: user.id,
         action: action,
         target_student_id: targetId,
         details: details
     });
-    fetchAuditLogs(); // I-refresh ang log table sa UI pagkatapos mag-log
+    fetchAuditLogs(); 
 }
 
 // 3. Add Grade with Logging
 async function addGrade() {
-    const user_id = document.getElementById("student").value;
+    const student_id = document.getElementById("student").value; // 'id' sa DB
     const subject_id = document.getElementById("subject").value;
     const grade = document.getElementById("grade").value;
 
-    if (!user_id || !subject_id || !grade) return alert("Pakisagutan lahat ng fields!");
+    if (!student_id || !subject_id || !grade) return alert("Pakisagutan lahat ng fields!");
 
     const { error } = await _supabase.from("grades").insert({ 
-        user_id,
-        subject_id,
-        grade 
+        user_id: student_id, // Match sa database schema mo
+        subject_id: subject_id,
+        grade: grade 
     });
     
     if (error) {
         alert("Error: " + error.message);
     } else {
-        await logAction("ADD_GRADE", user_id, `Added grade ${grade} for subject ID: ${subject_id}`);
+        await logAction("ADD_GRADE", student_id, `Added grade ${grade} for subject ID: ${subject_id}`);
         alert("Grade Added & Logged!");
-        loadGrades();
+        // loadGrades(); // Siguraduhing may function ka nito
     }
 }
 
@@ -46,7 +47,7 @@ async function updateStudent() {
 
     const { error } = await _supabase.from("students")
         .update({ name, role })
-        .eq("user_id", studentId);
+        .eq("id", studentId); // FIX: 'id' dapat, hindi 'user_id'
 
     if (error) {
         alert(error.message);
@@ -57,7 +58,7 @@ async function updateStudent() {
     }
 }
 
-// 5. Fetch and Display Audit Logs (BAGO)
+// 5. Fetch and Display Audit Logs
 async function fetchAuditLogs() {
     const { data, error } = await _supabase
         .from("audit_logs")
@@ -67,35 +68,39 @@ async function fetchAuditLogs() {
     if (error) return console.error(error);
 
     const logTableBody = document.getElementById("logTableBody");
-    logTableBody.innerHTML = data.map(log => `
-        <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px;">${log.action}</td>
-            <td style="padding: 10px;">${log.target_student_id}</td>
-            <td style="padding: 10px;">${log.details}</td>
-            <td style="padding: 10px;">${new Date(log.created_at).toLocaleString()}</td>
-        </tr>
-    `).join('');
+    if (logTableBody) {
+        logTableBody.innerHTML = data.map(log => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px;">${log.action}</td>
+                <td style="padding: 10px;">${log.target_student_id}</td>
+                <td style="padding: 10px;">${log.details}</td>
+                <td style="padding: 10px;">${new Date(log.created_at).toLocaleString()}</td>
+            </tr>
+        `).join('');
+    }
 }
 
-// 6. Initial Load Data (Para sa mga Select Dropdowns)
+// 6. Initial Load Data
 async function loadData() {
-    // Load Students
-    const { data: students } = await _supabase.from("students").select("user_id, name");
+    // Load Students - FIX: 'id' ang gamit sa table
+    const { data: students } = await _supabase.from("students").select("id, name");
     const studentSelects = [document.getElementById("student"), document.getElementById("editStudent")];
     
-    studentSelects.forEach(select => {
-        if (!select) return;
-        select.innerHTML = students.map(s => `<option value="${s.user_id}">${s.name || s.user_id}</option>`).join('');
-    });
+    if (students) {
+        studentSelects.forEach(select => {
+            if (!select) return;
+            select.innerHTML = students.map(s => `<option value="${s.id}">${s.name || s.id}</option>`).join('');
+        });
+    }
 
-    // Load Subjects (Dapat may 'subjects' table ka)
+    // Load Subjects
     const { data: subjects } = await _supabase.from("subjects").select("id, name");
     const subjectSelects = [document.getElementById("subject"), document.getElementById("filterSubject")];
     
     if (subjects) {
         subjectSelects.forEach(select => {
             if (!select) return;
-            select.innerHTML += subjects.map(sub => `<option value="${sub.id}">${sub.name}</option>`).join('');
+            select.innerHTML = subjects.map(sub => `<option value="${sub.id}">${sub.name}</option>`).join('');
         });
     }
 }
@@ -106,7 +111,6 @@ async function logout() {
     window.location.href = "index.html";
 }
 
-// Pag-load ng page
 window.onload = () => {
     loadData();
     fetchAuditLogs();
