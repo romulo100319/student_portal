@@ -1,6 +1,6 @@
 // 1. Configuration - Gamitin ang '_supabase' para iwas conflict
 const supabaseUrl = "https://nrlsgrzqpduzzzphkhtn.supabase.co";
-const supabaseKey = "YeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybHNncnpxcGR1enp6cGhraHRuIiwicm9sZSI6ImFubm9uIiwiaWF0IjoxNzcwNjI2MDY0LCJleHAiOjIwODYyMDIwNjR9.oQj3f76HaEHtweWu7vKTr1Atc1XYFq8gffv9eIO78Mc";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybHNncnpxcGR1enp6cGhraHRuIiwicm9sZSI6ImFubm9uIiwiaWF0IjoxNzcwNjI2MDY0LCJleHAiOjIwODYyMDIwNjR9.oQj3f76HaEHtweWu7vKTr1Atc1XYFq8gffv9eIO78Mc";
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // 2. Protection & Audit Helper
