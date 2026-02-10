@@ -13,17 +13,22 @@ async function register() {
     if (error) return alert("Reg Error: " + error.message);
 
     if (data.user) {
-        // Gagamit tayo ng 'id' column dahil ito ang primary link sa Auth
+        // DITO NATIN I-HARDCODE ANG ROLE NA STUDENT
         const { error: dbError } = await _supabase.from("students").insert({
             id: data.user.id, 
-            user_id: data.user.id, // I-fill up din natin ito para sigurado
+            user_id: data.user.id,
             email: data.user.email,
-            name: "New Student",
+            name: "New Student", // Pwede mo rin itong lagyan ng input field later
             student_no: "STU-" + Math.floor(1000 + Math.random() * 9000),
-            role: "student" 
+            role: "student" // <--- Eto yung mahalaga, wag lagyan ng quotes sa database
         });
-        if (dbError) alert("Profile Error: " + dbError.message);
-        else alert("Registered! Check your email or login now.");
+
+        if (dbError) {
+            console.error("Profile Error:", dbError);
+            alert("Profile Error: " + dbError.message);
+        } else {
+            alert("Registered successfully as a Student!");
+        }
     }
 }
 
