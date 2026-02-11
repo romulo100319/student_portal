@@ -1,25 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portal - Login</title>
+    <title>Student Portal | Login</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-
-<div class="h-captcha" data-sitekey="6d8c342a-d06e-4e40-bd5a-0d1232f40a7a"></div>
 </head>
 <body>
 
-<div class="container">
-    <h2>Student Login</h2>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <div class="btn-group">
-        <button onclick="login()">Login</button>
-        <button onclick="register()" style="background-color: #10b981;">Register</button>
-    </div>
-</div>
+    <div class="main-wrapper">
+        <div class="blob"></div>
+        
+        <div id="auth-container" class="glass-card">
+            
+            <div id="login-section">
+                <h2 class="animate-text">Student Login</h2>
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Email Address">
+                    <input type="password" id="password" placeholder="Password">
+                </div>
+                
+                <div class="h-captcha" data-sitekey="6d8c342a-d06e-4e40-bd5a-0d1232f40a7a"></div>
+                
+                <button onclick="login()" class="btn-auth">Login</button>
+                <p class="switch-form">New here? <a href="javascript:void(0)" onclick="toggleAuth()">Create an Account</a></p>
+            </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script src="script.js"></script>
+            <div id="register-section" style="display: none;">
+                <h2 class="animate-text">Create Account</h2>
+                <div class="input-group">
+                    <input type="text" id="reg-name" placeholder="Full Name">
+                    <input type="email" id="reg-email" placeholder="Email Address">
+                    <input type="password" id="reg-password" placeholder="Password">
+                </div>
+
+                <div class="h-captcha" data-sitekey="6d8c342a-d06e-4e40-bd5a-0d1232f40a7a"></div>
+
+                <button onclick="register()" class="btn-auth btn-reg">Register Now</button>
+                <p class="switch-form">Already have an account? <a href="javascript:void(0)" onclick="toggleAuth()">Go back to Login</a></p>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
 </body>
 </html>

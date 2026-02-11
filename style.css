@@ -130,3 +130,38 @@ button:active {
     margin: 5px 0;
     color: #4b5563;
 }
+/* Glassmorphism Effect */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: all 0.5s ease-in-out;
+}
+
+/* Entry Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+/* Smooth Transition between Login & Register */
+.switch-animation {
+    animation: slideOut 0.3s ease forwards;
+}
+
+@keyframes slideOut {
+    to { opacity: 0; transform: scale(0.95); }
+}

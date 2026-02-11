@@ -90,3 +90,24 @@ async function login() {
     // Role-based Redirection
     window.location.href = (profile.role === 'admin') ? 'admin.html' : 'dashboard.html';
 }
+
+function toggleAuth() {
+    const loginSec = document.getElementById('login-section');
+    const registerSec = document.getElementById('register-section');
+    const card = document.getElementById('auth-container');
+
+    // Add a quick "pop" effect
+    card.style.transform = "scale(0.98)";
+    
+    setTimeout(() => {
+        if (loginSec.style.display === 'none') {
+            loginSec.style.display = 'block';
+            registerSec.style.display = 'none';
+        } else {
+            loginSec.style.display = 'none';
+            registerSec.style.display = 'block';
+        }
+        card.style.transform = "scale(1)";
+        hcaptcha.reset(); // Importante: Reset captcha pag lumipat ng form
+    }, 300);
+}
