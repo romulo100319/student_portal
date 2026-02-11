@@ -68,4 +68,56 @@ async function login() {
     }
 
     // Role-based Redirection
-    checkProfile
+    checkProfileAndRedirect(data.user);
+}
+
+// Helper para sa Redirection logic
+async function checkProfileAndRedirect(user) {
+    let { data: profile } = await _supabase
+        .from("students")
+        .select("role")
+        .eq("user_id", user.id)
+        .single();
+
+    if (!profile) {
+        const { data: newProfile } = await _supabase
+            .from("students")
+            .insert({
+                user_id: user.id,
+                email: user.email,
+                name: user.email.split('@')[0],
+                student_no: "STU-" + Math.floor(1000 + Math.random() * 9000),
+                role: "student"
+            })
+            .select().single();
+        profile = newProfile;
+    }
+
+    window.location.href = (profile.role === 'admin') ? 'admin.html' : 'dashboard.html';
+}
+
+// 4. UI ANIMATION TOGGLE
+function toggleAuth() {
+    const loginSec = document.getElementById('login-section');
+    const registerSec = document.getElementById('register-section');
+    const card = document.getElementById('auth-container');
+
+    // Animation para sa Transition
+    card.style.opacity = "0.5";
+    card.style.transform = "scale(0.95) translateY(10px)";
+    
+    setTimeout(() => {
+        if (loginSec.style.display === 'none') {
+            loginSec.style.display = 'block';
+            registerSec.style.display = 'none';
+        } else {
+            loginSec.style.display = 'none';
+            registerSec.style.display = 'block';
+        }
+        
+        card.style.opacity = "1";
+        card.style.transform = "scale(1) translateY(0)";
+        
+        if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
+    }, 300);
+}
