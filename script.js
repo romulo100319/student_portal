@@ -83,13 +83,13 @@ async function login() {
     });
     
     if (error) {
-        hcaptcha.reset();
+        // IMPORTANTE: I-reset ang captcha widget para makakuha ng bagong token
+        if (typeof hcaptcha !== 'undefined') hcaptcha.reset(); 
         return Swal.fire("Login Failed", error.message, "error");
     }
 
     checkProfileAndRedirect(data.user);
 }
-
 async function checkProfileAndRedirect(user) {
     let { data: profile, error: fetchError } = await _supabase
         .from("students")
