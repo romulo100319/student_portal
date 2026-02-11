@@ -49,12 +49,16 @@ async function register() {
 
 // 3. LOGIN FUNCTION
 async function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
     const captchaToken = getCaptchaToken();
     
     if (!captchaToken) return alert("Paki-solve muna ang CAPTCHA! 🤖");
-    if (!email || !password) return alert("Email and Password are required!");
+
+    // Disable button para hindi mag-double click
+    const loginBtn = document.querySelector("button[onclick='login()']");
+    loginBtn.disabled = true;
+    loginBtn.innerText = "Logging in...";
 
     const { data, error } = await _supabase.auth.signInWithPassword({ 
         email, 
@@ -63,11 +67,15 @@ async function login() {
     });
     
     if (error) {
+        alert("Login Failed: " + error.message);
+        // IMPORTANTE: Reset captcha kapag nag-fail para makakuha ng bagong token
         if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
-        return alert("Login Failed: " + error.message);
+        loginBtn.disabled = false;
+        loginBtn.innerText = "Login";
+        return;
     }
 
-    // Role-based Redirection
+    // Kung success, diretso na sa profile check
     checkProfileAndRedirect(data.user);
 }
 
