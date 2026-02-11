@@ -21,25 +21,24 @@ const showLoading = (msg) => {
 };
 
 // 2. REGISTER FUNCTION
+// 2. REGISTER FUNCTION (No Captcha Version)
 async function register() {
     const name = document.getElementById("reg-name").value; 
     const email = document.getElementById("reg-email").value;
     const password = document.getElementById("reg-password").value;
-    const captchaToken = getCaptchaToken();
 
-    if (!captchaToken) return Swal.fire("Oops!", "Paki-verify muna na tao ka (CAPTCHA)! 🤖", "warning");
+    // TANGGAL NA ANG CAPTCHA CHECK DITO
     if (!name || !email || !password) return Swal.fire("Kulang!", "Paki-fill up lahat ng fields!", "info");
 
     showLoading("Creating your account...");
 
+    // TANGGAL NA RIN ANG OPTIONS { captchaToken }
     const { data, error } = await _supabase.auth.signUp({
         email, 
-        password, 
-        options: { captchaToken: captchaToken } // Siguraduhing tama ang property name
+        password
     });
 
     if (error) {
-        hcaptcha.reset();
         return Swal.fire("Error", error.message, "error");
     }
 
@@ -61,7 +60,7 @@ async function register() {
             icon: "success",
             confirmButtonColor: "#3085d6"
         }).then(() => {
-            hcaptcha.reset(); // Reset after success
+            // Wala nang hcaptcha.reset() dito
             toggleAuth();
         });
     }
