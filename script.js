@@ -2,11 +2,16 @@ const supabaseUrl = "https://nrlsgrzqpduzzzphkhtn.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybHNncnpxcGR1enp6cGhraHRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2MjYwNjQsImV4cCI6MjA4NjIwMjA2NH0.oQj3f76HaEHtweWu7vKTr1Atc1XYFq8gffv9eIO78Mc";
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+// FIX: Mas robust na pagkuha ng token
 function getCaptchaToken() {
-    return (typeof hcaptcha !== 'undefined') ? hcaptcha.getResponse() : "";
+    if (typeof hcaptcha !== 'undefined') {
+        const response = hcaptcha.getResponse();
+        console.log("Captcha Token Captured:", response ? "Yes" : "No"); // Para makita mo sa Console
+        return response;
+    }
+    return "";
 }
 
-// Custom Helper para sa Loading Alert
 const showLoading = (msg) => {
     Swal.fire({
         title: msg,
@@ -28,7 +33,9 @@ async function register() {
     showLoading("Creating your account...");
 
     const { data, error } = await _supabase.auth.signUp({
-        email, password, options: { captchaToken }
+        email, 
+        password, 
+        options: { captchaToken: captchaToken } // Siguraduhing tama ang property name
     });
 
     if (error) {
@@ -37,7 +44,8 @@ async function register() {
     }
 
     if (data.user) {
-        await _supabase.from("students").insert({
+        // Auto-create profile record
+        const { error: dbError } = await _supabase.from("students").insert({
             user_id: data.user.id,
             email: data.user.email,
             name: name,
@@ -45,12 +53,17 @@ async function register() {
             role: "student"
         });
 
+        if (dbError) console.error("Database Insert Error:", dbError.message);
+
         Swal.fire({
             title: "Success!",
-            text: "Account created! Check your email for verification.",
+            text: "Account created! You can now login.",
             icon: "success",
             confirmButtonColor: "#3085d6"
-        }).then(() => toggleAuth());
+        }).then(() => {
+            hcaptcha.reset(); // Reset after success
+            toggleAuth();
+        });
     }
 }
 
@@ -65,7 +78,9 @@ async function login() {
     showLoading("Verifying credentials...");
 
     const { data, error } = await _supabase.auth.signInWithPassword({ 
-        email, password, options: { captchaToken } 
+        email, 
+        password, 
+        options: { captchaToken: captchaToken } 
     });
     
     if (error) {
@@ -76,16 +91,16 @@ async function login() {
     checkProfileAndRedirect(data.user);
 }
 
-// Helper para sa Redirection logic
 async function checkProfileAndRedirect(user) {
-    let { data: profile } = await _supabase
+    let { data: profile, error: fetchError } = await _supabase
         .from("students")
         .select("role")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle(); // Gumamit ng maybeSingle para hindi mag-error kung wala pang record
 
     if (!profile) {
-        const { data: newProfile } = await _supabase
+        console.log("Profile missing, creating one...");
+        const { data: newProfile, error: createError } = await _supabase
             .from("students")
             .insert({
                 user_id: user.id,
@@ -95,6 +110,11 @@ async function checkProfileAndRedirect(user) {
                 role: "student"
             })
             .select().single();
+        
+        if (createError) {
+            console.error("Auto-profile failed:", createError);
+            return Swal.fire("System Error", "Hindi makagawa ng student profile.", "error");
+        }
         profile = newProfile;
     }
 
@@ -109,7 +129,6 @@ async function checkProfileAndRedirect(user) {
     });
 }
 
-// 4. UI ANIMATION TOGGLE
 function toggleAuth() {
     const loginSec = document.getElementById('login-section');
     const registerSec = document.getElementById('register-section');
@@ -129,6 +148,7 @@ function toggleAuth() {
         card.classList.remove('animate__fadeOutDown');
         card.classList.add('animate__fadeInUp');
         
+        // Refresh hCaptcha widgets upon switching forms
         if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
     }, 500);
 }
