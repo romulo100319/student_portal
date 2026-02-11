@@ -1,49 +1,56 @@
-// 1. Configuration
 const supabaseUrl = "https://nrlsgrzqpduzzzphkhtn.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybHNncnpxcGR1enp6cGhraHRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2MjYwNjQsImV4cCI6MjA4NjIwMjA2NH0.oQj3f76HaEHtweWu7vKTr1Atc1XYFq8gffv9eIO78Mc";
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Helper para sa Captcha
 function getCaptchaToken() {
-    if (typeof hcaptcha !== 'undefined') return hcaptcha.getResponse();
-    return "";
+    return (typeof hcaptcha !== 'undefined') ? hcaptcha.getResponse() : "";
 }
+
+// Custom Helper para sa Loading Alert
+const showLoading = (msg) => {
+    Swal.fire({
+        title: msg,
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+};
 
 // 2. REGISTER FUNCTION
 async function register() {
-    // Gumamit ng 'reg-' prefix para sa IDs ng Register Section
     const name = document.getElementById("reg-name").value; 
     const email = document.getElementById("reg-email").value;
     const password = document.getElementById("reg-password").value;
     const captchaToken = getCaptchaToken();
 
-    if (!captchaToken) return alert("Paki-verify muna na tao ka (CAPTCHA)! 🤖");
-    if (!name || !email || !password) return alert("Paki-fill up lahat ng fields!");
+    if (!captchaToken) return Swal.fire("Oops!", "Paki-verify muna na tao ka (CAPTCHA)! 🤖", "warning");
+    if (!name || !email || !password) return Swal.fire("Kulang!", "Paki-fill up lahat ng fields!", "info");
+
+    showLoading("Creating your account...");
 
     const { data, error } = await _supabase.auth.signUp({
-        email,
-        password,
-        options: { captchaToken }
+        email, password, options: { captchaToken }
     });
 
     if (error) {
-        if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
-        return alert("Registration Error: " + error.message);
+        hcaptcha.reset();
+        return Swal.fire("Error", error.message, "error");
     }
 
     if (data.user) {
-        // Auto-create profile record
-        const { error: dbError } = await _supabase.from("students").insert({
+        await _supabase.from("students").insert({
             user_id: data.user.id,
             email: data.user.email,
-            name: name, // Gamitin ang actual name na ininput
+            name: name,
             student_no: "STU-" + Math.floor(1000 + Math.random() * 9000),
             role: "student"
         });
 
-        if (dbError) console.error("DB Error:", dbError.message);
-        alert("Registered successfully! Check your email for verification.");
-        toggleAuth(); // Balik sa Login form matapos mag-register
+        Swal.fire({
+            title: "Success!",
+            text: "Account created! Check your email for verification.",
+            icon: "success",
+            confirmButtonColor: "#3085d6"
+        }).then(() => toggleAuth());
     }
 }
 
@@ -53,29 +60,19 @@ async function login() {
     const password = document.getElementById("login-password").value;
     const captchaToken = getCaptchaToken();
     
-    if (!captchaToken) return alert("Paki-solve muna ang CAPTCHA! 🤖");
+    if (!captchaToken) return Swal.fire("Verification Required", "Paki-solve muna ang CAPTCHA! 🤖", "warning");
 
-    // Disable button para hindi mag-double click
-    const loginBtn = document.querySelector("button[onclick='login()']");
-    loginBtn.disabled = true;
-    loginBtn.innerText = "Logging in...";
+    showLoading("Verifying credentials...");
 
     const { data, error } = await _supabase.auth.signInWithPassword({ 
-        email, 
-        password,
-        options: { captchaToken } 
+        email, password, options: { captchaToken } 
     });
     
     if (error) {
-        alert("Login Failed: " + error.message);
-        // IMPORTANTE: Reset captcha kapag nag-fail para makakuha ng bagong token
-        if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
-        loginBtn.disabled = false;
-        loginBtn.innerText = "Login";
-        return;
+        hcaptcha.reset();
+        return Swal.fire("Login Failed", error.message, "error");
     }
 
-    // Kung success, diretso na sa profile check
     checkProfileAndRedirect(data.user);
 }
 
@@ -101,7 +98,15 @@ async function checkProfileAndRedirect(user) {
         profile = newProfile;
     }
 
-    window.location.href = (profile.role === 'admin') ? 'admin.html' : 'dashboard.html';
+    Swal.fire({
+        title: "Welcome!",
+        text: "Redirecting to your dashboard...",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
+    }).then(() => {
+        window.location.href = (profile.role === 'admin') ? 'admin.html' : 'dashboard.html';
+    });
 }
 
 // 4. UI ANIMATION TOGGLE
@@ -110,9 +115,7 @@ function toggleAuth() {
     const registerSec = document.getElementById('register-section');
     const card = document.getElementById('auth-container');
 
-    // Animation para sa Transition
-    card.style.opacity = "0.5";
-    card.style.transform = "scale(0.95) translateY(10px)";
+    card.classList.add('animate__animated', 'animate__fadeOutDown');
     
     setTimeout(() => {
         if (loginSec.style.display === 'none') {
@@ -123,9 +126,9 @@ function toggleAuth() {
             registerSec.style.display = 'block';
         }
         
-        card.style.opacity = "1";
-        card.style.transform = "scale(1) translateY(0)";
+        card.classList.remove('animate__fadeOutDown');
+        card.classList.add('animate__fadeInUp');
         
         if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
-    }, 300);
+    }, 500);
 }
